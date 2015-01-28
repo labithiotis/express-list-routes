@@ -1,6 +1,6 @@
 {
   "name": "express-list-routes",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "List routes for Express 4",
   "keywords": ["express","routes","list","log","paths"],
   "main": "index.js",
