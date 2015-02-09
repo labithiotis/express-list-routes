@@ -1,6 +1,6 @@
 {
   "name": "express-list-routes",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "List routes for Express 4",
   "keywords": ["express","routes","list","log","paths"],
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository" : {
     "type" : "git",
-    "url" : "https://github.com/dazzer13/express-list-routes.git"
+    "url" : "https://github.com/labithiotis/express-list-routes.git"
   },
   "author": "Darren Labithiotis",
   "license": "ISC",
