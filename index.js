@@ -35,8 +35,8 @@ module.exports = function() {
                         var route = stack.route,
                             methodsDone= {};
                         _.each(route.stack, function(r){
-                            var method = r.method.toUpperCase();
-                            if(!methodsDone[method]){
+                          var method = r.method ? r.method.toUpperCase() : null;
+                          if(!methodsDone[method] && method){
                                 console.info(colorMethod(method), spacer(options.spacer - method.length), options.prefix + route.path);
                                 methodsDone[method] = true;
                             }
