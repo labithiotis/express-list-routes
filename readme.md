@@ -6,22 +6,31 @@
   [![NPM Downloads][downloads-image]][downloads-url]
 
 ```js
-var expressListRoutes   = require('express-list-routes'),
-    express             = require('express'),
-    router              = express.Router();
+const express = require('express');
+const expressListRoutes = require('express-list-routes');
+
+const app = express();
+const router = new express.Router();
+const fn = res => {
+  res.send({
+      ok: 'ok'
+  });
+};
+
+router.route('/user').post(fn).get(fn).put(fn);
 
 app.use('/api/v1', router);
 
-router.route('/user')
-  .post(fn)
-  .get(fn)
-  .put(fn);
-    
-expressListRoutes({ prefix: '/api/v1' }, 'API:', router );
-
+expressListRoutes({
+    title: 'API'
+    prefix: '/api/v1',
+    router
+}, routesList => {
+    console.log(routesList);
+})
 ```
 
-Will output
+That will log the following response to the console.
 
 ```console
 API:
@@ -38,14 +47,17 @@ $ npm install express-list-routes --save
 
 ## Options
 
-You can pass any three aguments of either a `String` `Express Router` or `Options`
+You can pass these options to the main method.
 
 **Options Object**
 ```js
-  {
+{
+    title: '', // Only shown when 'string' is passed to return field
     prefix: '', // The prefix for router Path
-    spacer: 7   // Spacer between router Method and Path
-  }
+    spacer: 7 // Spacer between router Method and Path
+    router, // Express Router object
+    return: 'string' // Defaults to 'string' but can also accept 'array'
+}
 ```
 
 
