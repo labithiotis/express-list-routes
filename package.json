@@ -1,20 +1,42 @@
 {
-  "name": "express-list-routes",
-  "version": "0.1.4",
-  "description": "List routes for Express 4",
-  "keywords": ["express","routes","list","log","paths"],
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/labithiotis/express-list-routes.git"
-  },
-  "author": "Darren Labithiotis",
-  "license": "ISC",
-  "dependencies": {
-    "colors": "^1.0.3",
-    "lodash": "^3.0.0"
-  }
+    "name": "express-list-routes",
+    "version": "0.1.4",
+    "description": "List routes for Express 4",
+    "keywords": [
+        "express",
+        "routes",
+        "list"
+    ],
+    "main": "index.js",
+    "scripts": {
+        "test": "xo && ava"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/labithiotis/express-list-routes.git"
+    },
+    "author": "Darren Labithiotis",
+    "license": "ISC",
+    "dependencies": {
+        "colors": "^1.1.2"
+    },
+    "devDependencies": {
+        "ava": "^0.21.0",
+        "dedent": "^0.7.0",
+        "express": "^4.15.4",
+        "xo": "^0.18.2"
+    },
+    "xo": {
+        "space": 4,
+        "rules": {
+            "space-before-function-paren": [
+                "error",
+                "never"
+            ]
+        },
+        "envs": [
+            "node",
+            "es6"
+        ]
+    }
 }
