@@ -6,18 +6,17 @@
   [![NPM Downloads][downloads-image]][downloads-url]
 
 ```js
-var expressListRoutes   = require('express-list-routes'),
-    express             = require('express'),
-    router              = express.Router();
+const expressListRoutes   = require('express-list-routes');
+const express             = require('express');
+    
+const app = express();
 
-app.use('/api/v1', router);
-
-router.route('/user')
+app
   .post(fn)
   .get(fn)
   .put(fn);
     
-expressListRoutes({ prefix: '/api/v1' }, 'API:', router );
+expressListRoutes({ prefix: '/api/v1' }, 'API:', app._router );
 
 ```
 
