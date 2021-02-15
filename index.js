@@ -1,49 +1,81 @@
-var _       = require('lodash'),
-    colors  = require('colors'),
-    options = {
-        prefix: '',
-        spacer: 7
-    };
+const defaultOptions = {
+  prefix: '',
+  spacer: 7,
+};
 
-function spacer(x) {
-    var res = '';
-    while(x--) res += ' ';
-    return res;
-}
+const COLORS = {
+  yellow: 33,
+  green: 32,
+  blue: 34,
+  red: 31,
+  grey: 90,
+  magenta: 35,
+  clear: 39,
+};
+
+const spacer = (x) => [...new Array(x)].map(() => ' ').join('');
+
+const colorText = (color, string) => `\u001b[${color}m${string}\u001b[${COLORS.clear}m`;
 
 function colorMethod(method) {
-    switch(method){
-        case('POST'):   return method.yellow; break;
-        case('GET'):    return method.green; break;
-        case('PUT'):    return method.blue; break;
-        case('DELETE'): return method.red; break;
-        case('PATCH'):  return method.grey; break;
-        default:        return method;
-    }
+  switch (method) {
+    case 'POST':
+      return colorText(COLORS.yellow, method);
+    case 'GET':
+      return colorText(COLORS.green, method);
+    case 'PUT':
+      return colorText(COLORS.blue, method);
+    case 'DELETE':
+      return colorText(COLORS.red, method);
+    case 'PATCH':
+      return colorText(COLORS.grey, method);
+    default:
+      return method;
+  }
 }
 
-module.exports = function() {
-    _.each(arguments, function(arg){
-        if (_.isString(arg)) {
-            console.info(arg.magenta);
-        } else if (_.isObject(arg)) {
-            if(!arg.stack) {
-                _.assign(options, arg);
-            } else {
-                _.each(arg.stack, function(stack){
-                    if (stack.route) {
-                        var route = stack.route,
-                            methodsDone= {};
-                        _.each(route.stack, function(r){
-                          var method = r.method ? r.method.toUpperCase() : null;
-                          if(!methodsDone[method] && method){
-                                console.info(colorMethod(method), spacer(options.spacer - method.length), options.prefix + route.path);
-                                methodsDone[method] = true;
-                            }
-                        });
-                    }
-                });
-            }
+function getStacks(app) {
+  // Express 3
+  if (app.routes) {
+    // convert to express 4
+    return Object.keys(app.routes)
+      .reduce((acc, method) => [...acc, ...app.routes[method]], [])
+      .map((route) => ({ route: { stack: [route] } }));
+  }
+
+  // Express 4
+  if (app._router && app._router.stack) {
+    return app._router.stack.reduce((acc, stack) => {
+      if (stack.handle.stack) {
+        return [...acc, ...stack.handle.stack];
+      }
+      return [...acc, stack];
+    }, []);
+  }
+
+  return [];
+}
+
+module.exports = function expressListRoutes(app, opts) {
+  const stacks = getStacks(app);
+  const options = { ...defaultOptions, ...opts };
+
+  if (stacks) {
+    for (const stack of stacks) {
+      if (stack.route) {
+        const routeLogged = {};
+        for (const route of stack.route.stack) {
+          const method = route.method ? route.method.toUpperCase() : null;
+          if (!routeLogged[method] && method) {
+            console.info(
+              colorMethod(method),
+              spacer(options.spacer - method.length),
+              [options.prefix, stack.route.path, route.path].filter((s) => !!s).join(''),
+            );
+            routeLogged[method] = true;
+          }
         }
-    });
+      }
+    }
+  }
 };
