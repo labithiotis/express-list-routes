@@ -6,9 +6,10 @@
   [![NPM Downloads][downloads-image]][downloads-url]
 
 ```js
-var expressListRoutes   = require('express-list-routes'),
-    express             = require('express'),
-    router              = express.Router();
+const expressListRoutes = require('express-list-routes');
+const express = require('express');
+
+const app = express()
 
 app.use('/api/v1', router);
 
@@ -17,7 +18,7 @@ router.route('/user')
   .get(fn)
   .put(fn);
     
-expressListRoutes({ prefix: '/api/v1' }, 'API:', router );
+expressListRoutes(router, { prefix: '/api/v1' });
 
 ```
 
@@ -48,6 +49,17 @@ You can pass any three aguments of either a `String` `Express Router` or `Option
   }
 ```
 
+## Migrations 
+### 0.1 -> 1.0
+The order of the params have changed, and dropped support for freeform text.
+
+**BEFORE 0.1<**
+
+```expressListRoutes({ prefix: '/api/v1' }, 'API:', router);```
+
+**AFTER 0.2+**
+
+```expressListRoutes(router, { prefix: '/api/v1' });```
 
 [npm-image]: https://img.shields.io/npm/v/express-list-routes.svg?style=flat
 [npm-url]: https://npmjs.org/package/express-list-routes
