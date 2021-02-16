@@ -84,7 +84,6 @@ module.exports = function expressListRoutes(app, opts) {
       if (stack.route) {
         const routeLogged = {};
         for (const route of stack.route.stack) {
-          console.log(stack);
           const method = route.method ? route.method.toUpperCase() : null;
           if (!routeLogged[method] && method) {
             const stackMethod = colorMethod(method);
