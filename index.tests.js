@@ -85,15 +85,15 @@ describe('express 4', () => {
 
     router.route('/user').post(handler).get(handler).put(handler);
 
-    app.use(router);
+    app.use('/admin', router);
 
     expressListRoutes(app, { prefix: '/api/v1' });
 
     expect(global.console.info.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
-      ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/user'],
-      ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/user'],
-      ['\u001b[34mPUT\u001b[39m', '    ', '/api/v1/user'],
+      ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'],
+      ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/admin/user'],
+      ['\u001b[34mPUT\u001b[39m', '    ', '/api/v1/admin/user'],
     ]);
   });
 
@@ -152,15 +152,15 @@ describe('express 5', () => {
 
     router.route('/user').post(handler).get(handler).put(handler);
 
-    app.use(router);
+    app.use('/admin', router);
 
     expressListRoutes(app, { prefix: '/api/v1' });
 
     expect(global.console.info.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
-      ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/user'],
-      ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/user'],
-      ['\u001b[34mPUT\u001b[39m', '    ', '/api/v1/user'],
+      ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'],
+      ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/admin/user'],
+      ['\u001b[34mPUT\u001b[39m', '    ', '/api/v1/admin/user'],
     ]);
   });
 

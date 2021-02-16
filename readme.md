@@ -5,35 +5,43 @@
   [![NPM Version][npm-image]][npm-url]
   [![NPM Downloads][downloads-image]][downloads-url]
 
+**Example App**
 ```js
-const expressListRoutes = require('express-list-routes');
 const express = require('express');
+const expressListRoutes = require('express-list-routes');
 
-const app = express()
+const app = express();
 
-app.use('/api/v1', router);
+app.get('/health', fn)
 
+app.use('/admin', router);
 router.route('/user')
   .post(fn)
   .get(fn)
   .put(fn);
-    
-expressListRoutes(router, { prefix: '/api/v1' });
-
+``` 
+**List all Routes with prefix**
+```js
+expressListRoutes(app, { prefix: '/api/v1' });
+// Logs out the following:
+// GET    /api/v1/health
+// POST   /api/v1/admin/user
+// GET    /api/v1/admin/user
+// PUT    /api/v1/admin/user
 ```
-
-Will output
-
-```console
-POST   /api/v1/user
-GET    /api/v1/user
-PUT    /api/v1/user
+**Or only log out nested router routes**
+```js
+expressListRoutes(router);
+// Logs out the following:
+// POST   /admin/user
+// GET    /admin/user
+// PUT    /admin/user
 ```
 
 ## Installation
 
 ```bash
-$ npm install express-list-routes
+npm install express-list-routes
 ```
 
 ## Options

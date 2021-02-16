@@ -1,3 +1,5 @@
+const path = require('path');
+
 const defaultOptions = {
   prefix: '',
   spacer: 7,
@@ -34,6 +36,18 @@ function colorMethod(method) {
   }
 }
 
+function getPathFromRegex(regexp) {
+  return regexp.toString().replace('/^', '').replace('?(?=\\/|$)/i', '').replace(/\\\//g, '/');
+}
+
+function combineStacks(acc, stack) {
+  if (stack.handle.stack) {
+    const routerPath = getPathFromRegex(stack.regexp);
+    return [...acc, ...stack.handle.stack.map((stack) => ({ routerPath, ...stack }))];
+  }
+  return [...acc, stack];
+}
+
 function getStacks(app) {
   // Express 3
   if (app.routes) {
@@ -45,32 +59,17 @@ function getStacks(app) {
 
   // Express 4
   if (app._router && app._router.stack) {
-    return app._router.stack.reduce((acc, stack) => {
-      if (stack.handle.stack) {
-        return [...acc, ...stack.handle.stack];
-      }
-      return [...acc, stack];
-    }, []);
+    return app._router.stack.reduce(combineStacks, []);
   }
 
   // Express 4 Router
   if (app.stack) {
-    return app.stack.reduce((acc, stack) => {
-      if (stack.handle.stack) {
-        return [...acc, ...stack.handle.stack];
-      }
-      return [...acc, stack];
-    }, []);
+    return app.stack.reduce(combineStacks, []);
   }
 
   // Express 5
   if (app.router && app.router.stack) {
-    return app.router.stack.reduce((acc, stack) => {
-      if (stack.handle.stack) {
-        return [...acc, ...stack.handle.stack];
-      }
-      return [...acc, stack];
-    }, []);
+    return app.router.stack.reduce(combineStacks, []);
   }
 
   return [];
@@ -85,13 +84,15 @@ module.exports = function expressListRoutes(app, opts) {
       if (stack.route) {
         const routeLogged = {};
         for (const route of stack.route.stack) {
+          console.log(stack);
           const method = route.method ? route.method.toUpperCase() : null;
           if (!routeLogged[method] && method) {
-            console.info(
-              colorMethod(method),
-              spacer(options.spacer - method.length),
-              [options.prefix, stack.route.path, route.path].filter((s) => !!s).join(''),
+            const stackMethod = colorMethod(method);
+            const stackSpace = spacer(options.spacer - method.length);
+            const stackPath = path.resolve(
+              [options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''),
             );
+            console.info(stackMethod, stackSpace, stackPath);
             routeLogged[method] = true;
           }
         }
