@@ -13,7 +13,7 @@ const COLORS = {
   clear: 39,
 };
 
-const spacer = (x) => [...new Array(x)].map(() => ' ').join('');
+const spacer = (x) => (x > 0 ? [...new Array(x)].map(() => ' ').join('') : '');
 
 const colorText = (color, string) => `\u001b[${color}m${string}\u001b[${COLORS.clear}m`;
 
@@ -56,6 +56,16 @@ function getStacks(app) {
   // Express 4 Router
   if (app.stack) {
     return app.stack.reduce((acc, stack) => {
+      if (stack.handle.stack) {
+        return [...acc, ...stack.handle.stack];
+      }
+      return [...acc, stack];
+    }, []);
+  }
+
+  // Express 5
+  if (app.router && app.router.stack) {
+    return app.router.stack.reduce((acc, stack) => {
       if (stack.handle.stack) {
         return [...acc, ...stack.handle.stack];
       }
