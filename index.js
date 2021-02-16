@@ -53,6 +53,16 @@ function getStacks(app) {
     }, []);
   }
 
+  // Express 4 Router
+  if (app.stack) {
+    return app.stack.reduce((acc, stack) => {
+      if (stack.handle.stack) {
+        return [...acc, ...stack.handle.stack];
+      }
+      return [...acc, stack];
+    }, []);
+  }
+
   return [];
 }
 

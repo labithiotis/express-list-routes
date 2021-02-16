@@ -25,7 +25,6 @@ expressListRoutes(router, { prefix: '/api/v1' });
 Will output
 
 ```console
-API:
 POST   /api/v1/user
 GET    /api/v1/user
 PUT    /api/v1/user
@@ -34,17 +33,16 @@ PUT    /api/v1/user
 ## Installation
 
 ```bash
-$ npm install express-list-routes --save
+$ npm install express-list-routes
 ```
 
 ## Options
 
-You can pass any three aguments of either a `String` `Express Router` or `Options`
+You can pass a second argument to set some options
 
-**Options Object**
 ```js
   {
-    prefix: '', // The prefix for router Path
+    prefix: '', // A prefix for router Path
     spacer: 7   // Spacer between router Method and Path
   }
 ```
@@ -57,7 +55,7 @@ The order of the params have changed, and dropped support for freeform text.
 
 ```expressListRoutes({ prefix: '/api/v1' }, 'API:', router);```
 
-**AFTER 0.2+**
+**AFTER 1.0+**
 
 ```expressListRoutes(router, { prefix: '/api/v1' });```
 

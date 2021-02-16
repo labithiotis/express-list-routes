@@ -1,9 +1,11 @@
 {
   "name": "express-list-routes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "List routes for Express 4",
   "keywords": [
     "express",
+    "express3",
+    "express4",
     "routes",
     "list",
     "log",

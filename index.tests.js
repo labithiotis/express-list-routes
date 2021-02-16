@@ -56,6 +56,25 @@ describe('express 4', () => {
     ]);
   });
 
+  it('works with express.Router', () => {
+    const app = express4();
+    const router = express4.Router();
+
+    app.get('/test', handler);
+
+    router.route('/user').post(handler).get(handler).put(handler);
+
+    app.use(router);
+
+    expressListRoutes(router);
+
+    expect(global.console.info.mock.calls).toEqual([
+      ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
+      ['\u001b[32mGET\u001b[39m', '    ', '/user'],
+      ['\u001b[34mPUT\u001b[39m', '    ', '/user'],
+    ]);
+  });
+
   it('handles nested routers', () => {
     const app = express4();
     const router = express4.Router();
