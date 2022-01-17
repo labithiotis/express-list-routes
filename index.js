@@ -3,6 +3,7 @@ const path = require('path');
 const defaultOptions = {
   prefix: '',
   spacer: 7,
+  logger: console.info,
 };
 
 const COLORS = {
@@ -91,7 +92,7 @@ module.exports = function expressListRoutes(app, opts) {
             const stackPath = path.resolve(
               [options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''),
             );
-            console.info(stackMethod, stackSpace, stackPath);
+            options.logger(stackMethod, stackSpace, stackPath);
             routeLogged[method] = true;
           }
         }
