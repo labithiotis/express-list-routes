@@ -19,7 +19,7 @@ router.route('/user')
   .post(fn)
   .get(fn)
   .put(fn);
-``` 
+```
 **List all Routes with prefix**
 ```js
 expressListRoutes(app, { prefix: '/api/v1' });
@@ -51,11 +51,12 @@ You can pass a second argument to set some options
 ```js
   {
     prefix: '', // A prefix for router Path
-    spacer: 7   // Spacer between router Method and Path
+    spacer: 7,  // Spacer between router Method and Path
+    output: 'json' // Output settings ['' || 'json'] json: will return a json object
   }
 ```
 
-## Migrations 
+## Migrations
 ### 0.1 -> 1.0
 The order of the params have changed, and dropped support for freeform text.
 
