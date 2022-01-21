@@ -3,6 +3,7 @@ const path = require('path');
 const defaultOptions = {
   prefix: '',
   spacer: 7,
+  output: ''
 };
 
 const COLORS = {
@@ -75,9 +76,75 @@ function getStacks(app) {
   return [];
 }
 
+/**
+ * function returns a JSON object divided in subroutes in subdirectories
+ *
+ * routerList = {
+ *  '/user': [
+ *    {method: 'GET', routerPath: '/info', path: "user/info"},
+ *    {method: 'POST', routerPath: '/', path: "user/"},
+ *    {method: 'PATCH', routerPath: '/:id', path: "user/:id"}
+ *   ],
+ *  'addresses' : [
+ *    {method: 'GET', routerPath: '/overview', path: "addresses/overview"},
+ *    {method: 'POST', routerPath: 'customer/', path: "addresses/customer"},
+ *    {method: 'PATCH', routerPath: 'customer/:id', path: "addresses/customer/:id"}
+ *    ],
+ *    .....
+ *   }
+ *
+ * @return { object }
+ */
+const getRouterList = (stacks) => {
+  const routerList = {};
+  let routes= [];
+  let routerFolder;
+  if (stacks) {
+    const routerFolderLogged = {};
+    for (const stack of stacks) {
+
+      // put the filled routes array to the routerList object before
+      // property gets reseted
+      if (routes && routes.length !== 0) routerList[routerFolder] = routes;
+
+      routerFolder = stack.routerPath || '/';
+
+      // create or change property of route list and reset the routes array
+      // if routerFolder changes
+      if (!routerFolderLogged[routerFolder] && routerFolder) {
+        routerList[routerFolder] = [];
+        routerFolderLogged[routerFolder] = true;
+        routes = [];
+      }
+      if (stack.route) {
+        const routeLogged = {};
+        for (const route of stack.route.stack) {
+          const method = route.method ? route.method.toUpperCase() : null;
+          const completePath = path.resolve(
+            [stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join("")
+          );
+          if (!routeLogged[method] && method) {
+            routes.push({
+              method,
+              routerPath: stack.route.path,
+              path: completePath,
+            });
+            routeLogged[method] = true;
+          }
+        }
+      }
+    }
+    // last stack of stacks
+    routerList[routerFolder] = routes;
+  }
+  return routerList;
+}
+
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
+
+  if(stacks && options.output === 'json') return getRouterList(stacks);
 
   if (stacks) {
     for (const stack of stacks) {
