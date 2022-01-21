@@ -109,6 +109,28 @@ describe('express 4', () => {
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
     ]);
   });
+
+  it('returns a json object', ()=>{
+    const app = express4();
+    const router = express4.Router();
+    app.get('/test', handler);
+
+    router.route('/user').post(handler).get(handler).put(handler);
+
+    app.use('/admin', router);
+
+    const routerList = expressListRoutes(app, { prefix: '/api/v1', output:'json' });
+
+    expect(routerList).toEqual(expect.objectContaining(
+      {
+        '/': [ { method: 'GET', routerPath: '/test', path: '/test' } ],
+      '/admin/': [
+        { method: 'POST', routerPath: '/user', path: '/admin/user' },
+        { method: 'GET', routerPath: '/user', path: '/admin/user' },
+        { method: 'PUT', routerPath: '/user', path: '/admin/user' }
+      ]
+    }))
+  })
 });
 
 describe('express 5', () => {
