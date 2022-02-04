@@ -3,7 +3,7 @@ const path = require('path');
 const defaultOptions = {
   prefix: '',
   spacer: 7,
-  output: ''
+  output: '',
 };
 
 const COLORS = {
@@ -97,12 +97,11 @@ function getStacks(app) {
  */
 const getRouterList = (stacks) => {
   const routerList = {};
-  let routes= [];
+  let routes = [];
   let routerFolder;
   if (stacks) {
     const routerFolderLogged = {};
     for (const stack of stacks) {
-
       // put the filled routes array to the routerList object before
       // property gets reseted
       if (routes && routes.length !== 0) routerList[routerFolder] = routes;
@@ -120,9 +119,14 @@ const getRouterList = (stacks) => {
         const routeLogged = {};
         for (const route of stack.route.stack) {
           const method = route.method ? route.method.toUpperCase() : null;
-          const completePath = path.resolve(
-            [stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join("")
-          );
+
+          // Unfortunately, in Windows-based systems the drive letters are added
+          // to the path. Therefore the complete path is converted by replace.
+          const completePath = path
+            .resolve([stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
+            .replace(/[A-Z]+/g, '') // removes drive letter
+            .replace(/[\\\:]+/g, '/') // removes singel backslash
+            .replace(/\\\\/g, '/'); // removes double backslashes
           if (!routeLogged[method] && method) {
             routes.push({
               method,
@@ -138,13 +142,13 @@ const getRouterList = (stacks) => {
     routerList[routerFolder] = routes;
   }
   return routerList;
-}
+};
 
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
 
-  if(stacks && options.output === 'json') return getRouterList(stacks);
+  if (stacks && options.output === 'json') return getRouterList(stacks);
 
   if (stacks) {
     for (const stack of stacks) {
