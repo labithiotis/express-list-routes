@@ -124,9 +124,8 @@ const getRouterList = (stacks) => {
           // to the path. Therefore the complete path is converted by replace.
           const completePath = path
             .resolve([stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
-            .replace(/[A-Z]+/g, '') // removes drive letter
-            .replace(/[\\\:]+/g, '/') // removes singel backslash
-            .replace(/\\\\/g, '/'); // removes double backslashes
+            .replace(/^[A-Z][\:][\\]+/g, "/") // removes drive letter C:\
+            .replace(/\\\\/+g, '/'); // removes double backslashes
           if (!routeLogged[method] && method) {
             routes.push({
               method,
