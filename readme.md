@@ -37,6 +37,22 @@ expressListRoutes(router);
 // GET    /admin/user
 // PUT    /admin/user
 ```
+**List all Routes with prefix and log out in JSON format**
+```js
+expressListRoutes(app, { prefix: '/api/v1', toJson: true, spacer: 2 });
+// Logs out the following:
+  [
+    {
+      "method": "GET",
+      "path": "/api/v1/user"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/user"
+    }
+  ]
+
+```
 
 ## Installation
 
@@ -51,7 +67,8 @@ You can pass a second argument to set some options
 ```js
   {
     prefix: '', // A prefix for router Path
-    spacer: 7   // Spacer between router Method and Path
+    spacer: 7,   // Spacer between router Method and Path
+    toJson: true  // Show route in JSON format to use it externally
   }
 ```
 

@@ -3,6 +3,7 @@ const path = require('path');
 const defaultOptions = {
   prefix: '',
   spacer: 7,
+  toJson: false
 };
 
 const COLORS = {
@@ -78,7 +79,7 @@ function getStacks(app) {
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
-
+  let jsonResp = [];
   if (stacks) {
     for (const stack of stacks) {
       if (stack.route) {
@@ -91,11 +92,21 @@ module.exports = function expressListRoutes(app, opts) {
             const stackPath = path.resolve(
               [options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''),
             );
-            console.info(stackMethod, stackSpace, stackPath);
+            if(options.toJson) {
+              jsonResp.push({
+                "method": method,
+                "path": stackPath
+              })
+            } else {
+              console.info(stackMethod, stackSpace, stackPath);
+            }
             routeLogged[method] = true;
           }
         }
       }
     }
+  }
+  if(options.toJson) {
+    console.info(JSON.stringify(jsonResp, null, options.spacer));
   }
 };

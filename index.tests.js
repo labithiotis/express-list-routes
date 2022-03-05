@@ -175,5 +175,6 @@ describe('express 5', () => {
       ['\u001b[32mGET\u001b[39m', '', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
     ]);
+    expressListRoutes(app, { prefix: '/api/v1', spacer: 2, toJson: true });
   });
 });
