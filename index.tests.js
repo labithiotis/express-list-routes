@@ -4,23 +4,22 @@ const express5 = require('express5');
 
 const expressListRoutes = require('./index');
 
-jest.spyOn(global.console, 'info');
-
 function handler(req, res) {
   res.send('handled');
 }
 
 describe('express 3', () => {
   it('prints out all routes', () => {
+    const logger = jest.fn();
     const app = express3();
 
     app.get('/test', handler);
     app.post('/user', handler);
     app.get('/user', handler);
 
-    expressListRoutes(app);
+    expressListRoutes(app, { logger });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/test'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
@@ -28,15 +27,16 @@ describe('express 3', () => {
   });
 
   it('works with prefix and dividers', () => {
+    const logger = jest.fn();
     const app = express3();
 
     app.get('/test', handler);
     app.post('/user', handler);
     app.get('/user', handler);
 
-    expressListRoutes(app, { prefix: '/api/v1' });
+    expressListRoutes(app, { logger, prefix: '/api/v1' });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/user'],
@@ -46,19 +46,21 @@ describe('express 3', () => {
 
 describe('express 4', () => {
   it('works with top level routes', () => {
+    const logger = jest.fn();
     const app = express4();
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app);
+    expressListRoutes(app, { logger });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
     ]);
   });
 
   it('works with express.Router', () => {
+    const logger = jest.fn();
     const app = express4();
     const router = express4.Router();
 
@@ -68,9 +70,9 @@ describe('express 4', () => {
 
     app.use(router);
 
-    expressListRoutes(router);
+    expressListRoutes(router, { logger });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[34mPUT\u001b[39m', '    ', '/user'],
@@ -78,6 +80,7 @@ describe('express 4', () => {
   });
 
   it('handles nested routers', () => {
+    const logger = jest.fn();
     const app = express4();
     const router = express4.Router();
 
@@ -87,9 +90,9 @@ describe('express 4', () => {
 
     app.use('/admin', router);
 
-    expressListRoutes(app, { prefix: '/api/v1' });
+    expressListRoutes(app, { logger, prefix: '/api/v1' });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/admin/user'],
@@ -98,13 +101,14 @@ describe('express 4', () => {
   });
 
   it('works with  options', () => {
+    const logger = jest.fn();
     const app = express4();
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app, { prefix: '/api/v1', spacer: 3 });
+    expressListRoutes(app, { logger, prefix: '/api/v1', spacer: 3 });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
     ]);
@@ -113,19 +117,21 @@ describe('express 4', () => {
 
 describe('express 5', () => {
   it('works with top level routes', () => {
+    const logger = jest.fn();
     const app = express5();
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app);
+    expressListRoutes(app, { logger });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
     ]);
   });
 
   it('works with express.Router', () => {
+    const logger = jest.fn();
     const app = express5();
     const router = express5.Router();
 
@@ -135,9 +141,9 @@ describe('express 5', () => {
 
     app.use(router);
 
-    expressListRoutes(router);
+    expressListRoutes(router, { logger });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[34mPUT\u001b[39m', '    ', '/user'],
@@ -145,6 +151,7 @@ describe('express 5', () => {
   });
 
   it('handles nested routers', () => {
+    const logger = jest.fn();
     const app = express5();
     const router = express5.Router();
 
@@ -154,9 +161,9 @@ describe('express 5', () => {
 
     app.use('/admin', router);
 
-    expressListRoutes(app, { prefix: '/api/v1' });
+    expressListRoutes(app, { logger, prefix: '/api/v1' });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/admin/user'],
@@ -165,13 +172,14 @@ describe('express 5', () => {
   });
 
   it('works with options', () => {
+    const logger = jest.fn();
     const app = express5();
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app, { prefix: '/api/v1', spacer: 3 });
+    expressListRoutes(app, { logger, prefix: '/api/v1', spacer: 3 });
 
-    expect(global.console.info.mock.calls).toEqual([
+    expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
     ]);
