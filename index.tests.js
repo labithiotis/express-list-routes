@@ -14,8 +14,10 @@ describe('express 3', () => {
     const app = express3();
 
     app.get('/test', handler);
-    app.post('/user', handler);
     app.get('/user', handler);
+    app.post('/user', handler);
+    app.patch('/user', handler);
+    app.delete('/user', handler);
 
     const paths = expressListRoutes(app, { logger });
 
@@ -23,11 +25,15 @@ describe('express 3', () => {
       { method: 'GET', path: '/test' },
       { method: 'GET', path: '/user' },
       { method: 'POST', path: '/user' },
+      { method: 'PATCH', path: '/user' },
+      { method: 'DELETE', path: '/user' },
     ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/test'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
+      ['\u001b[90mPATCH\u001b[39m', '  ', '/user'],
+      ['\u001b[31mDELETE\u001b[39m', ' ', '/user'],
     ]);
   });
 
@@ -221,5 +227,40 @@ describe('express 5', () => {
       ['\u001b[32mGET\u001b[39m', '', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
     ]);
+  });
+});
+
+describe('unknown app', () => {
+  it('works if the app passed in does not have stacks/routes', () => {
+    const logger = jest.fn();
+
+    const paths = expressListRoutes({}, { logger });
+
+    expect(paths).toEqual([]);
+    expect(logger.mock.calls).toEqual([]);
+  });
+
+  it('handles "other" methods', () => {
+    const logger = jest.fn();
+    const app = express3();
+
+    app.trace('/test', handler);
+
+    const paths = expressListRoutes(app, { logger });
+
+    expect(paths).toEqual([{ method: 'TRACE', path: '/test' }]);
+    expect(logger.mock.calls).toEqual([['TRACE', '  ', '/test']]);
+  });
+
+  it('disable coloring method names if option is false', () => {
+    const logger = jest.fn();
+    const app = express3();
+
+    app.get('/test', handler);
+
+    const paths = expressListRoutes(app, { logger, color: false });
+
+    expect(paths).toEqual([{ method: 'GET', path: '/test' }]);
+    expect(logger.mock.calls).toEqual([['GET', '    ', '/test']]);
   });
 });
