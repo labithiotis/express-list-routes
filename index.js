@@ -96,9 +96,9 @@ module.exports = function expressListRoutes(app, opts) {
           if (!routeLogged[method] && method) {
             const stackMethod = options.color ? colorMethod(method) : method;
             const stackSpace = spacer(options.spacer - method.length);
-            const stackPath = path.resolve(
-              [options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''),
-            );
+            const stackPath = path
+              .normalize([options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
+              .trim();
             options.logger(stackMethod, stackSpace, stackPath);
             paths.push({ method, path: stackPath });
             routeLogged[method] = true;
