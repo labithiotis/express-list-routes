@@ -4,6 +4,7 @@ const defaultOptions = {
   prefix: '',
   spacer: 7,
   logger: console.info,
+  color: true,
 };
 
 const COLORS = {
@@ -84,6 +85,7 @@ function getStacks(app) {
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
+  const paths = [];
 
   if (stacks) {
     for (const stack of stacks) {
@@ -92,16 +94,19 @@ module.exports = function expressListRoutes(app, opts) {
         for (const route of stack.route.stack) {
           const method = route.method ? route.method.toUpperCase() : null;
           if (!routeLogged[method] && method) {
-            const stackMethod = colorMethod(method);
+            const stackMethod = options.color ? colorMethod(method) : method;
             const stackSpace = spacer(options.spacer - method.length);
             const stackPath = path.resolve(
               [options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''),
             );
             options.logger(stackMethod, stackSpace, stackPath);
+            paths.push({ method, path: stackPath });
             routeLogged[method] = true;
           }
         }
       }
     }
   }
+
+  return paths;
 };
