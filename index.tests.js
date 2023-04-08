@@ -17,8 +17,13 @@ describe('express 3', () => {
     app.post('/user', handler);
     app.get('/user', handler);
 
-    expressListRoutes(app, { logger });
+    const paths = expressListRoutes(app, { logger });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/test' },
+      { method: 'GET', path: '/user' },
+      { method: 'POST', path: '/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/test'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
@@ -34,8 +39,13 @@ describe('express 3', () => {
     app.post('/user', handler);
     app.get('/user', handler);
 
-    expressListRoutes(app, { logger, prefix: '/api/v1' });
+    const paths = expressListRoutes(app, { logger, prefix: '/api/v1' });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/api/v1/test' },
+      { method: 'GET', path: '/api/v1/user' },
+      { method: 'POST', path: '/api/v1/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/user'],
@@ -51,8 +61,12 @@ describe('express 4', () => {
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app, { logger });
+    const paths = expressListRoutes(app, { logger });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/user' },
+      { method: 'POST', path: '/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
@@ -70,8 +84,13 @@ describe('express 4', () => {
 
     app.use(router);
 
-    expressListRoutes(router, { logger });
+    const paths = expressListRoutes(router, { logger });
 
+    expect(paths).toEqual([
+      { method: 'POST', path: '/user' },
+      { method: 'GET', path: '/user' },
+      { method: 'PUT', path: '/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
@@ -90,8 +109,14 @@ describe('express 4', () => {
 
     app.use('/admin', router);
 
-    expressListRoutes(app, { logger, prefix: '/api/v1' });
+    const paths = expressListRoutes(app, { logger, prefix: '/api/v1' });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/api/v1/test' },
+      { method: 'POST', path: '/api/v1/admin/user' },
+      { method: 'GET', path: '/api/v1/admin/user' },
+      { method: 'PUT', path: '/api/v1/admin/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/test'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'],
@@ -106,8 +131,12 @@ describe('express 4', () => {
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app, { logger, prefix: '/api/v1', spacer: 3 });
+    const paths = expressListRoutes(app, { logger, prefix: '/api/v1', spacer: 3 });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/api/v1/user' },
+      { method: 'POST', path: '/api/v1/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '', '/api/v1/user'],
       ['\u001b[33mPOST\u001b[39m', '', '/api/v1/user'],
@@ -122,8 +151,12 @@ describe('express 5', () => {
     app.get('/user', handler);
     app.post('/user', handler);
 
-    expressListRoutes(app, { logger });
+    const paths = expressListRoutes(app, { logger });
 
+    expect(paths).toEqual([
+      { method: 'GET', path: '/user' },
+      { method: 'POST', path: '/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
@@ -141,8 +174,13 @@ describe('express 5', () => {
 
     app.use(router);
 
-    expressListRoutes(router, { logger });
+    const paths = expressListRoutes(router, { logger });
 
+    expect(paths).toEqual([
+      { method: 'POST', path: '/user' },
+      { method: 'GET', path: '/user' },
+      { method: 'PUT', path: '/user' },
+    ]);
     expect(logger.mock.calls).toEqual([
       ['\u001b[33mPOST\u001b[39m', '   ', '/user'],
       ['\u001b[32mGET\u001b[39m', '    ', '/user'],

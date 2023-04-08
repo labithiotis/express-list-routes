@@ -23,6 +23,6 @@ interface ExpressApp {
   };
 }
 
-declare function expressListRoutes(app: ExpressApp, options?: Options): void;
+declare function expressListRoutes(app: ExpressApp, options?: Options): Array<{ method: string; path: string }>;
 
 export { expressListRoutes as default };
