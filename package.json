@@ -12,6 +12,7 @@
     "paths"
   ],
   "main": "index.js",
+	"types": "index.d.ts",
   "scripts": {
     "test": "jest"
   },
