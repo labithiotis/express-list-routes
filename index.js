@@ -38,7 +38,12 @@ function colorMethod(method) {
 }
 
 function getPathFromRegex(regexp) {
-  return regexp.toString().replace('/^', '').replace('?(?=\\/|$)/i', '').replace(/\\\//g, '/');
+  return regexp
+    .toString()
+    .replace('/^', '')
+    .replace('?(?=\\/|$)/i', '')
+    .replace(/\\\//g, '/')
+    .replace('(?:/(?=$))', '');
 }
 
 function combineStacks(acc, stack) {
