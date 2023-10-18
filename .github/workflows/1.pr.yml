@@ -1,8 +1,6 @@
-name: CI
+name: PR
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -11,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  test:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
