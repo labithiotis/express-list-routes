@@ -1,8 +1,8 @@
-name: Publish
+name: Version
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
       - run: npm run test
 
   version:
-    needs: [test]
+    needs: [ test ]
     name: Version
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -32,15 +32,5 @@ jobs:
       - uses: phips28/gh-action-bump-version@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish:
-    needs: [version]
-    name: Publish
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-      - uses: JS-DevTools/npm-publish@v2
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          tag-prefix:  'v'
