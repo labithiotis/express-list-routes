@@ -29,6 +29,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.ACTION_GITHUB_TOKEN }}
       - uses: phips28/gh-action-bump-version@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
