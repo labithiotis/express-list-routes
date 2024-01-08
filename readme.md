@@ -57,6 +57,14 @@ You can pass a second argument to set some options
   }
 ```
 
+## FAQ
+
+<details>
+<summary>Errors with importing this library</summary>
+You may need to enable esModuleInterop in your tsconfig.json to support default exports.
+</details>
+
+
 ## Migrations 
 ### 0.1 -> 1.0
 The order of the params have changed, and dropped support for freeform text.
