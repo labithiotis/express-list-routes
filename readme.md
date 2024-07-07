@@ -52,7 +52,7 @@ You can pass a second argument to set some options
   {
     prefix: '', // A prefix for router Path
     spacer: 7   // Spacer between router Method and Path
-    logger: console.info // A custom logger function
+    logger: console.info // A custom logger function or a boolean (true for default logger, false for no logging)
     color: true // If the console log should color the method name
   }
 ```

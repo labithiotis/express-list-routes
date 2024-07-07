@@ -82,6 +82,8 @@ function getStacks(app) {
   return [];
 }
 
+
+
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
@@ -99,7 +101,11 @@ module.exports = function expressListRoutes(app, opts) {
             const stackPath = path
               .normalize([options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
               .trim();
-            options.logger(stackMethod, stackSpace, stackPath);
+              if (options.logger === true) {
+                defaultOptions.logger(stackMethod, stackSpace, stackPath);
+              } else if (typeof options.logger === 'function') {
+                options.logger(stackMethod, stackSpace, stackPath);
+              }
             paths.push({ method, path: stackPath });
             routeLogged[method] = true;
           }

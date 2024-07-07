@@ -1,7 +1,7 @@
 interface Options {
   spacer?: number;
   prefix?: string;
-  logger?: (method: string, space: string, path: string) => void;
+  logger?: ((method: string, space: string, path: string) => void) | boolean;
   color?: boolean;
 }
 
