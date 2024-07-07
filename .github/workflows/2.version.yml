@@ -2,7 +2,7 @@ name: Version
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
@@ -23,14 +23,26 @@ jobs:
       - run: npm run test
 
   version:
-    needs: [ test ]
-    name: Version
+    needs: [test]
+    name: Bump version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: phips28/gh-action-bump-version@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: version
+        name: Bump version
+        uses: phips28/gh-action-bump-version@master
         with:
-          tag-prefix:  'v'
+          skip-commit: true
+      - name: Update
+        run: |
+          echo "`jq '.version="${{ steps.version.outputs.newTag }}"' package.json`" > package.json
+          echo "`jq '.version="${{ steps.version.outputs.newTag }}"' jsr.json`" > jsr.json
+      - name: Commit
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json jsr.json && git commit -m "ci: version bump to ${{ steps.version.outputs.newTag }}"
+          git push

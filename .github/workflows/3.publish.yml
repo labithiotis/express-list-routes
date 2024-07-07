@@ -10,17 +10,18 @@ concurrency:
 
 jobs:
   publish-npm:
-    name: Publish
+    name: Publish NPM
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - uses: JS-DevTools/npm-publish@v2
+      - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
 
   publish-jsr:
+    name: Publish JSR
     runs-on: ubuntu-latest
     permissions:
       contents: read
