@@ -5,7 +5,7 @@
   [![NPM Version][npm-image]][npm-url]
   [![NPM Downloads][downloads-image]][downloads-url]
 
-**Example App**
+#### Example App
 ```js
 const express = require('express');
 const expressListRoutes = require('express-list-routes');
@@ -20,7 +20,8 @@ router.route('/user')
   .get(fn)
   .put(fn);
 ``` 
-**List all Routes with prefix**
+
+#### List all Routes with prefix
 ```js
 expressListRoutes(app, { prefix: '/api/v1' });
 // Logs out the following:
@@ -29,13 +30,26 @@ expressListRoutes(app, { prefix: '/api/v1' });
 // GET    /api/v1/admin/user
 // PUT    /api/v1/admin/user
 ```
-**Or only log out nested router routes**
+
+#### Or only log out nested router routes
 ```js
 expressListRoutes(router);
 // Logs out the following:
 // POST   /admin/user
 // GET    /admin/user
 // PUT    /admin/user
+```
+
+#### Use combined paths to pragmatically do something
+`expressListRoutes` returns array of all routes found in express.
+
+```js
+const paths = expressListRoutes(req.app, { logger: false });
+paths.forEach((endpoint) => {
+  if (endpoint.path.endsWith('/')) {
+    ...
+  }
+});
 ```
 
 ## Installation
