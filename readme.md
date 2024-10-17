@@ -19,7 +19,7 @@ router.route('/user')
   .post(fn)
   .get(fn)
   .put(fn);
-``` 
+```
 
 #### List all Routes with prefix
 ```js
@@ -78,6 +78,7 @@ You can pass a second argument to set some options
 You may need to enable esModuleInterop in your tsconfig.json to support default exports.
 </details>
 
+For Express5 currently nested routes will all be printted out as `~` as theres no way to get parent router path from app object that I'm aware of.
 
 [npm-image]: https://img.shields.io/npm/v/express-list-routes.svg?style=flat
 [npm-url]: https://npmjs.org/package/express-list-routes
