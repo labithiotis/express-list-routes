@@ -47,10 +47,23 @@ function getPathFromRegex(regexp) {
     .replace('(?:/(?=$))', '');
 }
 
-function combineStacks(acc, stack) {
-  if (stack.handle.stack) {
+function combineExpress4Stacks(acc, stack) {
+  if (stack.handle?.stack && stack.regexp) {
     const routerPath = getPathFromRegex(stack.regexp);
-    return [...acc, ...stack.handle.stack.map((stack) => ({ routerPath, ...stack }))];
+    return [...acc, ...stack.handle.stack.map((nestedStack) => ({ routerPath, ...nestedStack }))];
+  }
+  return [...acc, stack];
+}
+
+function combineExpress5Stacks(acc, stack) {
+  if (stack.handle?.stack) {
+    // FIXME express5 we can't get the router path for nested
+    // The stack object has not reference to parent router path
+    // Tried looking through whole express app object and
+    // couldn't find any reference for nested routes.
+    // For now we just intedcated nested routes with ~
+    const routerPath = stack.path ?? '/~';
+    return [...acc, ...stack.handle.stack.map((nestedStack) => ({ routerPath, ...nestedStack }))];
   }
   return [...acc, stack];
 }
@@ -66,23 +79,21 @@ function getStacks(app) {
 
   // Express 4
   if (app._router && app._router.stack) {
-    return app._router.stack.reduce(combineStacks, []);
+    return app._router.stack.reduce(combineExpress4Stacks, []);
   }
 
   // Express 4 Router
   if (app.stack) {
-    return app.stack.reduce(combineStacks, []);
+    return app.stack.reduce(combineExpress4Stacks, []);
   }
 
   // Express 5
   if (app.router && app.router.stack) {
-    return app.router.stack.reduce(combineStacks, []);
+    return app.router.stack.reduce(combineExpress5Stacks, []);
   }
 
   return [];
 }
-
-
 
 module.exports = function expressListRoutes(app, opts) {
   const stacks = getStacks(app);
@@ -101,11 +112,11 @@ module.exports = function expressListRoutes(app, opts) {
             const stackPath = path
               .normalize([options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
               .trim();
-              if (options.logger === true) {
-                defaultOptions.logger(stackMethod, stackSpace, stackPath);
-              } else if (typeof options.logger === 'function') {
-                options.logger(stackMethod, stackSpace, stackPath);
-              }
+            if (options.logger === true) {
+              defaultOptions.logger(stackMethod, stackSpace, stackPath);
+            } else if (typeof options.logger === 'function') {
+              options.logger(stackMethod, stackSpace, stackPath);
+            }
             paths.push({ method, path: stackPath });
             routeLogged[method] = true;
           }
