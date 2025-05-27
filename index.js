@@ -5,6 +5,7 @@ const defaultOptions = {
   spacer: 7,
   logger: console.info,
   color: true,
+  forceUnixPathStyle: false,
 };
 
 const COLORS = {
@@ -43,8 +44,10 @@ function getPathFromRegex(regexp) {
     .toString()
     .replace('/^', '')
     .replace('?(?=\\/|$)/i', '')
+    .replace('\\?(?=\\\\|$)', '') // Remove \?(?=\\|$) pattern as string
     .replace(/\\\//g, '/')
-    .replace('(?:/(?=$))', '');
+    .replace('(?:/(?=$))', '')
+    .replace(/\/i$/, ''); // Remove trailing /i flag
 }
 
 function combineExpress4Stacks(acc, stack) {
@@ -109,9 +112,12 @@ module.exports = function expressListRoutes(app, opts) {
           if (!routeLogged[method] && method) {
             const stackMethod = options.color ? colorMethod(method) : method;
             const stackSpace = spacer(options.spacer - method.length);
-            const stackPath = path
+            let stackPath = path
               .normalize([options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
               .trim();
+            if (options.forceUnixPathStyle) {
+              stackPath = stackPath.replace(/\\/g, '/');
+            }
             if (options.logger === true) {
               defaultOptions.logger(stackMethod, stackSpace, stackPath);
             } else if (typeof options.logger === 'function') {

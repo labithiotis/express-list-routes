@@ -264,3 +264,85 @@ describe('unknown app', () => {
     expect(logger.mock.calls).toEqual([['GET', '    ', '/test']]);
   });
 });
+
+describe('new features', () => {
+  it('converts backslashes to forward slashes when forceUnixPathStyle is true', () => {
+    const logger = jest.fn();
+    const app = express4();
+    
+    // Mock Windows environment by manipulating the path separator
+    const originalSep = require('path').sep;
+    require('path').sep = '\\';
+    
+    app.get('/test/path', handler);
+    
+    const paths = expressListRoutes(app, { logger, forceUnixPathStyle: true });
+    
+    // Restore original separator
+    require('path').sep = originalSep;
+    
+    // Even on Windows, with forceUnixPathStyle: true, paths should use forward slashes
+    expect(paths[0].path).toContain('/');
+    expect(paths[0].path).not.toContain('\\');
+  });
+
+  it('removes ?(?=\\|$) pattern from paths', () => {
+    const app = express4();
+    
+    // Create a mock stack entry that simulates a regex with the problematic pattern
+    const mockStack = {
+      regexp: /^\/test\?(?=\\|$)/i,
+      handle: {
+        stack: [{
+          route: {
+            path: '/endpoint',
+            stack: [{ method: 'get' }]
+          }
+        }]
+      }
+    };
+    
+    // Override the app's router stack with our mock
+    app._router = { stack: [mockStack] };
+    
+    const paths = expressListRoutes(app, { logger: false });
+    
+    // The pattern should be removed from the final path
+    expect(paths).toHaveLength(1);
+    expect(paths[0].path).not.toContain('?(?=\\|$)');
+    expect(paths[0].path).toBe('/test/endpoint');
+  });
+
+  it('handles Windows paths with regex patterns as reported in issue', () => {
+    const app = express4();
+    
+    // Simulate the exact pattern from the issue: \topics\?(?=\|$)\:topicId
+    const mockStack = {
+      regexp: /^\\topics\\?(?=\\|$)/i,
+      handle: {
+        stack: [{
+          route: {
+            path: '/:topicId',
+            stack: [{ method: 'get' }]
+          }
+        }]
+      }
+    };
+    
+    app._router = { stack: [mockStack] };
+    
+    // Test without forceUnixPathStyle
+    let paths = expressListRoutes(app, { logger: false });
+    
+    // Should not contain the regex pattern
+    expect(paths[0].path).not.toContain('?(?=\\|$)');
+    // On Linux/Unix, backslashes should remain as is without the option
+    expect(paths[0].path).toBe('\\\\topics/:topicId');
+    
+    // Test with forceUnixPathStyle
+    paths = expressListRoutes(app, { logger: false, forceUnixPathStyle: true });
+    
+    // Should convert backslashes to forward slashes
+    expect(paths[0].path).toBe('//topics/:topicId');
+  });
+});
