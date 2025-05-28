@@ -265,7 +265,7 @@ describe('unknown app', () => {
   });
 });
 
-describe('new features', () => {
+describe('path styles', () => {
   it('converts backslashes to forward slashes when forceUnixPathStyle is true', () => {
     const logger = jest.fn();
     const app = express4();
