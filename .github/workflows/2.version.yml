@@ -44,5 +44,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          TAG_MSG=$(git log -1 --format=%B $(git rev-parse HEAD~0))
+          git push --delete origin ${{ steps.version.outputs.newTag }}
+          git tag -d ${{ steps.version.outputs.newTag }}
           git add package.json jsr.json && git commit -m "ci: version bump to ${{ steps.version.outputs.newTag }}"
-          git push
+          git tag -fa ${{ steps.version.outputs.newTag }} -m "$TAG_MSG"
+          git push --tags
