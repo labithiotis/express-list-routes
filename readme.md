@@ -68,6 +68,7 @@ You can pass a second argument to set some options
     spacer: 7   // Spacer between router Method and Path
     logger: console.info // A custom logger function or a boolean (true for default logger, false for no logging)
     color: true // If the console log should color the method name
+    forceUnixPathStyle: false // Convert Windows backslashes to forward slashes for consistent path display across platforms
   }
 ```
 
@@ -76,6 +77,16 @@ You can pass a second argument to set some options
 <details open>
 <summary>Errors with importing this library</summary>
 You may need to enable esModuleInterop in your tsconfig.json to support default exports.
+</details>
+
+<details>
+<summary>Windows path display shows backslashes</summary>
+On Windows systems, paths may display with backslashes (e.g., `\admin\user`) instead of forward slashes. This is due to Node.js path.normalize() behavior on Windows. To ensure consistent Unix-style paths across all platforms, set the `forceUnixPathStyle` option to `true`:
+
+```js
+expressListRoutes(app, { forceUnixPathStyle: true });
+// This will display: /admin/user (even on Windows)
+```
 </details>
 
 For Express5 currently nested routes will all be printted out as `~` as theres no way to get parent router path from app object that I'm aware of.
