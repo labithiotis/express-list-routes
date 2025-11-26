@@ -66,7 +66,7 @@ function combineExpress5Stacks(acc, stack, opts) {
     // Tried looking through whole express app object and
     // couldn't find any reference for nested routes.
     // For now we just intedcated nested routes with ~
-    const routerPath = stack.path ?? opts.pathFallback ?? '/~';
+    const routerPath = stack.path ?? opts?.pathFallback ?? '/~';
     return [...acc, ...stack.handle.stack.map((nestedStack) => ({ routerPath, ...nestedStack }))];
   }
   return [...acc, stack];
