@@ -69,6 +69,7 @@ You can pass a second argument to set some options
     logger: console.info // A custom logger function or a boolean (true for default logger, false for no logging)
     color: true // If the console log should color the method name
     forceUnixPathStyle: false // Convert Windows backslashes to forward slashes for consistent path display across platforms
+    pathFallback: '/~' // Fallback path value for nested routes
   }
 ```
 
