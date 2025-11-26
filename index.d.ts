@@ -4,6 +4,7 @@ interface Options {
   logger?: ((method: string, space: string, path: string) => void) | boolean;
   color?: boolean;
   forceUnixPathStyle?: boolean;
+  pathFallback?: string;
 }
 
 interface Route {
