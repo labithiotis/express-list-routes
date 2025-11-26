@@ -6,6 +6,7 @@ const defaultOptions = {
   logger: console.info,
   color: true,
   forceUnixPathStyle: false,
+  pathFallback: '/~',
 };
 
 const COLORS = {
@@ -58,20 +59,20 @@ function combineExpress4Stacks(acc, stack) {
   return [...acc, stack];
 }
 
-function combineExpress5Stacks(acc, stack) {
+function combineExpress5Stacks(acc, stack, opts) {
   if (stack.handle?.stack) {
     // FIXME express5 we can't get the router path for nested
     // The stack object has not reference to parent router path
     // Tried looking through whole express app object and
     // couldn't find any reference for nested routes.
     // For now we just intedcated nested routes with ~
-    const routerPath = stack.path ?? '/~';
+    const routerPath = stack.path ?? opts.pathFallback ?? '/~';
     return [...acc, ...stack.handle.stack.map((nestedStack) => ({ routerPath, ...nestedStack }))];
   }
   return [...acc, stack];
 }
 
-function getStacks(app) {
+function getStacks(app, opts) {
   // Express 3
   if (app.routes) {
     // convert to express 4
@@ -92,14 +93,14 @@ function getStacks(app) {
 
   // Express 5
   if (app.router && app.router.stack) {
-    return app.router.stack.reduce(combineExpress5Stacks, []);
+    return app.router.stack.reduce((acc, stack) => combineExpress5Stacks(acc, stack, opts), []);
   }
 
   return [];
 }
 
 module.exports = function expressListRoutes(app, opts) {
-  const stacks = getStacks(app);
+  const stacks = getStacks(app, opts);
   const options = { ...defaultOptions, ...opts };
   const paths = [];
 
