@@ -65,6 +65,7 @@ function replaceCaptureGroups(source, keys) {
       i = end;
     } else if (char === '(' && source[i + 1] !== '?') {
       let depth = 1;
+      let captures = 1;
       let j = i + 1;
       while (j < source.length && depth > 0) {
         if (source[j] === '\\') {
@@ -72,12 +73,16 @@ function replaceCaptureGroups(source, keys) {
         } else if (source[j] === '[') {
           j = skipClass(j);
         } else {
-          if (source[j] === '(') depth++;
-          else if (source[j] === ')') depth--;
+          if (source[j] === '(') {
+            depth++;
+            // nested capture groups (e.g. `:name(*)`) also consume a key
+            if (source[j + 1] !== '?') captures++;
+          } else if (source[j] === ')') depth--;
           j++;
         }
       }
-      const key = keys[keyIndex++];
+      const key = keys[keyIndex];
+      keyIndex += captures;
       out += key && typeof key.name === 'string' ? `:${key.name}` : '*';
       i = j;
     } else {
@@ -86,9 +91,9 @@ function replaceCaptureGroups(source, keys) {
     }
   }
 
-  // (?:\/:id) -> /:id, (?:\/:id)? -> /:id?, (?::id) -> :id
-  return out.replace(/\(\?:(\\?\/)?(:\w+|\*)\)(\?)?/g, (_, slash, name, optional) => {
-    return `${slash ? '/' : ''}${name}${optional || ''}`;
+  // (?:\/:id) -> /:id, (?:\/:id)? -> /:id?, (?:\.:ext) -> .:ext, (?::id) -> :id
+  return out.replace(/\(\?:(\\?\/|\\\.)?(:\w+|\*)\)(\?)?/g, (_, prefix, name, optional) => {
+    return `${prefix ? prefix.slice(-1) : ''}${name}${optional || ''}`;
   });
 }
 
@@ -159,8 +164,8 @@ module.exports = function expressListRoutes(app, opts) {
   if (stacks) {
     for (const stack of stacks) {
       if (stack.route) {
-        // app.get(['/a', '/b'], fn) stores route.path as an array
-        const routePaths = Array.isArray(stack.route.path) ? stack.route.path : [stack.route.path];
+        // app.get(['/a', ['/b']], fn) stores route.path as a (nested) array
+        const routePaths = [stack.route.path].flat(Infinity);
         for (const routePath of routePaths) {
           const routeLogged = {};
           for (const route of stack.route.stack) {

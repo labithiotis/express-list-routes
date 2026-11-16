@@ -134,10 +134,14 @@ describe('express 4', () => {
   it('lists each path of an array route separately', () => {
     const app = express4();
     app.get(['/a', '/b'], handler);
+    app.put(['/c', ['/d', ['/e']]], handler);
 
     expect(expressListRoutes(app, { logger: false })).toEqual([
       { method: 'GET', path: '/a' },
       { method: 'GET', path: '/b' },
+      { method: 'PUT', path: '/c' },
+      { method: 'PUT', path: '/d' },
+      { method: 'PUT', path: '/e' },
     ]);
   });
 
@@ -154,6 +158,8 @@ describe('express 4', () => {
     mount('/opt/:maybe?');
     mount('/num/:id(\\d+)');
     mount('/files/*');
+    mount('/glob/:name(*)/:id');
+    mount('/ext/:name.:ext');
 
     expect(expressListRoutes(app, { logger: false })).toEqual([
       { method: 'GET', path: '/users/:id/posts' },
@@ -161,6 +167,8 @@ describe('express 4', () => {
       { method: 'GET', path: '/opt/:maybe?/posts' },
       { method: 'GET', path: '/num/:id/posts' },
       { method: 'GET', path: '/files/*/posts' },
+      { method: 'GET', path: '/glob/:name/:id/posts' },
+      { method: 'GET', path: '/ext/:name.:ext/posts' },
     ]);
   });
 
@@ -279,10 +287,14 @@ describe('express 5', () => {
   it('lists each path of an array route separately', () => {
     const app = express5();
     app.get(['/a', '/b'], handler);
+    app.put(['/c', ['/d', ['/e']]], handler);
 
     expect(expressListRoutes(app, { logger: false })).toEqual([
       { method: 'GET', path: '/a' },
       { method: 'GET', path: '/b' },
+      { method: 'PUT', path: '/c' },
+      { method: 'PUT', path: '/d' },
+      { method: 'PUT', path: '/e' },
     ]);
   });
 
