@@ -40,9 +40,61 @@ function colorMethod(method) {
   }
 }
 
-function getPathFromRegex(regexp) {
-  return regexp
-    .toString()
+// Walks a regex source and swaps each capturing group for its express param
+// name (`:id`) or `*` for unnamed groups. Used for Express 4 routers mounted
+// on parameterised paths, e.g. app.use('/users/:id', router).
+function replaceCaptureGroups(source, keys) {
+  let out = '';
+  let keyIndex = 0;
+  let i = 0;
+
+  const skipClass = (j) => {
+    j++;
+    while (j < source.length && source[j] !== ']') j += source[j] === '\\' ? 2 : 1;
+    return j + 1;
+  };
+
+  while (i < source.length) {
+    const char = source[i];
+    if (char === '\\') {
+      out += source.slice(i, i + 2);
+      i += 2;
+    } else if (char === '[') {
+      const end = skipClass(i);
+      out += source.slice(i, end);
+      i = end;
+    } else if (char === '(' && source[i + 1] !== '?') {
+      let depth = 1;
+      let j = i + 1;
+      while (j < source.length && depth > 0) {
+        if (source[j] === '\\') {
+          j += 2;
+        } else if (source[j] === '[') {
+          j = skipClass(j);
+        } else {
+          if (source[j] === '(') depth++;
+          else if (source[j] === ')') depth--;
+          j++;
+        }
+      }
+      const key = keys[keyIndex++];
+      out += key && typeof key.name === 'string' ? `:${key.name}` : '*';
+      i = j;
+    } else {
+      out += char;
+      i++;
+    }
+  }
+
+  // (?:\/:id) -> /:id, (?:\/:id)? -> /:id?, (?::id) -> :id
+  return out.replace(/\(\?:(\\?\/)?(:\w+|\*)\)(\?)?/g, (_, slash, name, optional) => {
+    return `${slash ? '/' : ''}${name}${optional || ''}`;
+  });
+}
+
+function getPathFromRegex(regexp, keys) {
+  const source = keys?.length ? `/${replaceCaptureGroups(regexp.source, keys)}/i` : regexp.toString();
+  return source
     .replace('/^', '')
     .replace('?(?=\\/|$)/i', '')
     .replace('\\?(?=\\\\|$)', '') // Remove \?(?=\\|$) pattern as string
@@ -53,7 +105,7 @@ function getPathFromRegex(regexp) {
 
 function combineExpress4Stacks(acc, stack) {
   if (stack.handle?.stack && stack.regexp) {
-    const routerPath = getPathFromRegex(stack.regexp);
+    const routerPath = getPathFromRegex(stack.regexp, stack.keys);
     return [...acc, ...stack.handle.stack.map((nestedStack) => ({ routerPath, ...nestedStack }))];
   }
   return [...acc, stack];
@@ -107,25 +159,29 @@ module.exports = function expressListRoutes(app, opts) {
   if (stacks) {
     for (const stack of stacks) {
       if (stack.route) {
-        const routeLogged = {};
-        for (const route of stack.route.stack) {
-          const method = route.method ? route.method.toUpperCase() : null;
-          if (!routeLogged[method] && method) {
-            const stackMethod = options.color ? colorMethod(method) : method;
-            const stackSpace = spacer(options.spacer - method.length);
-            let stackPath = path
-              .normalize([options.prefix, stack.routerPath, stack.route.path, route.path].filter((s) => !!s).join(''))
-              .trim();
-            if (options.forceUnixPathStyle) {
-              stackPath = stackPath.replace(/\\/g, '/');
+        // app.get(['/a', '/b'], fn) stores route.path as an array
+        const routePaths = Array.isArray(stack.route.path) ? stack.route.path : [stack.route.path];
+        for (const routePath of routePaths) {
+          const routeLogged = {};
+          for (const route of stack.route.stack) {
+            const method = route.method ? route.method.toUpperCase() : null;
+            if (!routeLogged[method] && method) {
+              const stackMethod = options.color ? colorMethod(method) : method;
+              const stackSpace = spacer(options.spacer - method.length);
+              let stackPath = path
+                .normalize([options.prefix, stack.routerPath, routePath, route.path].filter((s) => !!s).join(''))
+                .trim();
+              if (options.forceUnixPathStyle) {
+                stackPath = stackPath.replace(/\\/g, '/');
+              }
+              if (options.logger === true) {
+                defaultOptions.logger(stackMethod, stackSpace, stackPath);
+              } else if (typeof options.logger === 'function') {
+                options.logger(stackMethod, stackSpace, stackPath);
+              }
+              paths.push({ method, path: stackPath });
+              routeLogged[method] = true;
             }
-            if (options.logger === true) {
-              defaultOptions.logger(stackMethod, stackSpace, stackPath);
-            } else if (typeof options.logger === 'function') {
-              options.logger(stackMethod, stackSpace, stackPath);
-            }
-            paths.push({ method, path: stackPath });
-            routeLogged[method] = true;
           }
         }
       }

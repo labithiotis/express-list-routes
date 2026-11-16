@@ -131,6 +131,39 @@ describe('express 4', () => {
     ]);
   });
 
+  it('lists each path of an array route separately', () => {
+    const app = express4();
+    app.get(['/a', '/b'], handler);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/a' },
+      { method: 'GET', path: '/b' },
+    ]);
+  });
+
+  it('restores params for routers mounted on parameterised paths', () => {
+    const app = express4();
+    const mount = (mountPath) => {
+      const router = express4.Router({ mergeParams: true });
+      router.get('/posts', handler);
+      app.use(mountPath, router);
+    };
+
+    mount('/users/:id');
+    mount('/orgs/:org/teams/:team');
+    mount('/opt/:maybe?');
+    mount('/num/:id(\\d+)');
+    mount('/files/*');
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/users/:id/posts' },
+      { method: 'GET', path: '/orgs/:org/teams/:team/posts' },
+      { method: 'GET', path: '/opt/:maybe?/posts' },
+      { method: 'GET', path: '/num/:id/posts' },
+      { method: 'GET', path: '/files/*/posts' },
+    ]);
+  });
+
   it('works with  options', () => {
     const logger = jest.fn();
     const app = express4();
@@ -212,6 +245,16 @@ describe('express 5', () => {
       ['\u001b[33mPOST\u001b[39m', '   ', '/api/v1/admin/user'], // FIXME express5 we can't get the router path for nested
       ['\u001b[32mGET\u001b[39m', '    ', '/api/v1/admin/user'], // FIXME express5 we can't get the router path for nested
       ['\u001b[34mPUT\u001b[39m', '    ', '/api/v1/admin/user'], // FIXME express5 we can't get the router path for nested
+    ]);
+  });
+
+  it('lists each path of an array route separately', () => {
+    const app = express5();
+    app.get(['/a', '/b'], handler);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/a' },
+      { method: 'GET', path: '/b' },
     ]);
   });
 
