@@ -90,7 +90,35 @@ expressListRoutes(app, { forceUnixPathStyle: true });
 ```
 </details>
 
-For Express5 currently nested routes will all be printted out as `~` as theres no way to get parent router path from app object that I'm aware of.
+## Express 5 limitations
+
+Express 5 doesn't keep the path a router was mounted on. When you call `app.use('/admin', router)`, the mount path is compiled into a matcher function and the original string is thrown away. That means routes inside a mounted router can't show their parent path, so this library puts `pathFallback` (default `/~`) in its place:
+
+```js
+const router = express.Router();
+router.get('/user', fn);
+app.use('/admin', router);
+
+expressListRoutes(app);
+// Express 4: GET    /admin/user
+// Express 5: GET    /~/user
+```
+
+This affects every router mounted with `app.use(path, router)`, including parameterised mounts like `app.use('/users/:id', router)`. Routes registered directly on the app (`app.get(...)`) are listed with their full paths, and so are array paths (`app.get(['/a', '/b'], fn)`, listed as `/a` and `/b`).
+
+If your app mounts a single router, you can set `pathFallback` to its mount path:
+
+```js
+expressListRoutes(app, { pathFallback: '/admin' });
+// GET    /admin/user
+```
+
+For several routers, call `expressListRoutes` once per router and pass each mount path as `prefix`:
+
+```js
+expressListRoutes(adminRouter, { prefix: '/admin' });
+expressListRoutes(usersRouter, { prefix: '/users/:id' });
+```
 
 [npm-image]: https://img.shields.io/npm/v/express-list-routes.svg?style=flat
 [npm-url]: https://npmjs.org/package/express-list-routes
