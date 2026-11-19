@@ -131,6 +131,75 @@ describe('express 4', () => {
     ]);
   });
 
+  it('lists each path of an array route separately', () => {
+    const app = express4();
+    app.get(['/a', '/b'], handler);
+    app.put(['/c', ['/d', ['/e']]], handler);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/a' },
+      { method: 'GET', path: '/b' },
+      { method: 'PUT', path: '/c' },
+      { method: 'PUT', path: '/d' },
+      { method: 'PUT', path: '/e' },
+    ]);
+  });
+
+  it('restores params for routers mounted on parameterised paths', () => {
+    const app = express4();
+    const mount = (mountPath) => {
+      const router = express4.Router({ mergeParams: true });
+      router.get('/posts', handler);
+      app.use(mountPath, router);
+    };
+
+    mount('/users/:id');
+    mount('/orgs/:org/teams/:team');
+    mount('/opt/:maybe?');
+    mount('/num/:id(\\d+)');
+    mount('/files/*');
+    mount('/glob/:name(*)/:id');
+    mount('/ext/:name.:ext');
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/users/:id/posts' },
+      { method: 'GET', path: '/orgs/:org/teams/:team/posts' },
+      { method: 'GET', path: '/opt/:maybe?/posts' },
+      { method: 'GET', path: '/num/:id/posts' },
+      { method: 'GET', path: '/files/*/posts' },
+      { method: 'GET', path: '/glob/:name/:id/posts' },
+      { method: 'GET', path: '/ext/:name.:ext/posts' },
+    ]);
+  });
+
+  it('handles char classes, escapes and nested groups in mount regexes', () => {
+    const app = express4();
+    const regexRouter = express4.Router();
+    regexRouter.get('/x', handler);
+    app.use(/^\/v[0-9\]]\/(\w+(?:-[a-z]+)?)/i, regexRouter);
+
+    const paramRouter = express4.Router();
+    paramRouter.get('/y', handler);
+    app.use('/n/:id([a-z(]+)', paramRouter);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/v[0-9\\]]/*/x' },
+      { method: 'GET', path: '/n/:id/y' },
+    ]);
+  });
+
+  it('lists array paths inside a mounted router', () => {
+    const app = express4();
+    const router = express4.Router();
+    router.post(['/one', '/two'], handler);
+    app.use('/api', router);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'POST', path: '/api/one' },
+      { method: 'POST', path: '/api/two' },
+    ]);
+  });
+
   it('works with  options', () => {
     const logger = jest.fn();
     const app = express4();
@@ -215,6 +284,32 @@ describe('express 5', () => {
     ]);
   });
 
+  it('lists each path of an array route separately', () => {
+    const app = express5();
+    app.get(['/a', '/b'], handler);
+    app.put(['/c', ['/d', ['/e']]], handler);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([
+      { method: 'GET', path: '/a' },
+      { method: 'GET', path: '/b' },
+      { method: 'PUT', path: '/c' },
+      { method: 'PUT', path: '/d' },
+      { method: 'PUT', path: '/e' },
+    ]);
+  });
+
+  it('uses pathFallback for routers mounted on parameterised paths', () => {
+    const app = express5();
+    const router = express5.Router({ mergeParams: true });
+    router.get('/posts', handler);
+    app.use('/users/:id', router);
+
+    expect(expressListRoutes(app, { logger: false })).toEqual([{ method: 'GET', path: '/~/posts' }]);
+    expect(expressListRoutes(app, { logger: false, pathFallback: '/users/:id' })).toEqual([
+      { method: 'GET', path: '/users/:id/posts' },
+    ]);
+  });
+
   it('works with options', () => {
     const logger = jest.fn();
     const app = express5();
@@ -250,6 +345,19 @@ describe('unknown app', () => {
 
     expect(paths).toEqual([{ method: 'TRACE', path: '/test' }]);
     expect(logger.mock.calls).toEqual([['TRACE', '  ', '/test']]);
+  });
+
+  it('logs with console.info when logger is true', () => {
+    const spy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    const app = express4();
+    app.get('/test', handler);
+
+    jest.isolateModules(() => {
+      require('./index')(app, { logger: true, color: false });
+    });
+
+    expect(spy).toHaveBeenCalledWith('GET', '    ', '/test');
+    spy.mockRestore();
   });
 
   it('disable coloring method names if option is false', () => {
